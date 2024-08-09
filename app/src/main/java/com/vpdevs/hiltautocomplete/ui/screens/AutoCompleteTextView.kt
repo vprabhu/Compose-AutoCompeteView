@@ -30,7 +30,7 @@ fun AutoCompleteTextView(
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .height(85.dp)
+            .height(100.dp)
             .padding(top = 32.dp),
         maxLines = 1,
         value = queryEntered,

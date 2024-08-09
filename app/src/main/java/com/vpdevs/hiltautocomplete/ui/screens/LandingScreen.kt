@@ -2,6 +2,7 @@ package com.vpdevs.hiltautocomplete.ui.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -20,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vpdevs.hiltautocomplete.ACViewmodel
@@ -36,9 +39,11 @@ fun LandingScreen(
         mutableStateOf(ArrayList())
     }
 
-    val selectedItem by remember { mutableStateOf("") }
+    var selectedItem by remember { mutableStateOf("") }
 
     var addNewItem by remember { mutableStateOf(false) }
+
+    var isSuggestionListShown by remember { mutableStateOf(false) }
 
     val wordsList by acViewmodel.playerList.collectAsState()
     acViewmodel.getALlWordsList()
@@ -54,6 +59,8 @@ fun LandingScreen(
                 "LandingScreen:onQueryChanged : $query"
             )
             if (query.isEmpty()) {
+                isSuggestionListShown = true
+                addNewItem = false
                 queryList.value.clear()
             }
             val isThere = wordsList.filter {
@@ -83,35 +90,42 @@ fun LandingScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-        ) {
-            items(count = queryList.value.size) {
-                TextButton(onClick = {
-                    Log.d(
-                        "LandingScreen",
-                        "LandingScreen:TextButton : ${queryList.value[it]}"
-                    )
-                    if (addNewItem) {
-                        acViewmodel.insertWord(queryList.value[it].name)
+        AnimatedVisibility(visible = isSuggestionListShown) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+            ) {
+                items(count = queryList.value.size) {
+                    TextButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        onClick = {
+                            Log.d(
+                                "LandingScreen",
+                                "LandingScreen:TextButton : ${queryList.value[it]}"
+                            )
+                            if (addNewItem) {
+                                acViewmodel.insertWord(queryList.value[it].name)
+                                addNewItem = false
+                            }
+                            selectedItem = queryList.value[it].name
+                            isSuggestionListShown = false
+                        }) {
+                        val text = if (addNewItem) {
+                            "create new :${queryList.value[it].name}"
+                        } else {
+                            queryList.value[it].name
+                        }
+                        Text(text = text)
                     }
-//                    selectedItem = queryList.value[it].name
-//                    queryList.value.clear()
-
-                }) {
-                    val text = if (addNewItem) {
-                        "create new :${queryList.value[it].name}"
-                    } else {
-                        queryList.value[it].name
-                    }
-                    Text(text = text)
+                    HorizontalDivider(thickness = 1.dp, color = Color.Black)
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
-
-                Spacer(modifier = Modifier.height(4.dp))
             }
         }
+
     }
 
 }

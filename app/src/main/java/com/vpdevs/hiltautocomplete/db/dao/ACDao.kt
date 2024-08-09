@@ -13,7 +13,7 @@ interface ACDao {
     @Query("select * from AutoCompleteText")
     fun getWordsList(): Flow<List<ACText>>
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWord(players: ACText)
 
 }

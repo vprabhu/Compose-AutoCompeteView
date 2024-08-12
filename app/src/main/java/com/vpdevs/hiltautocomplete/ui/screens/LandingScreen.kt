@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vpdevs.hiltautocomplete.ACViewmodel
@@ -41,6 +42,8 @@ fun LandingScreen(
 
     var selectedItem by remember { mutableStateOf("") }
 
+    val focusManager = LocalFocusManager.current
+
     var addNewItem by remember { mutableStateOf(false) }
 
     var isSuggestionListShown by remember { mutableStateOf(false) }
@@ -58,15 +61,17 @@ fun LandingScreen(
                 "LandingScreen",
                 "LandingScreen:onQueryChanged : $query"
             )
+            isSuggestionListShown = true
+            selectedItem = query
+
             if (query.isEmpty()) {
-                isSuggestionListShown = true
                 addNewItem = false
-                queryList.value.clear()
+                isSuggestionListShown = false
             }
-            val isThere = wordsList.filter {
+            val isWordThere = wordsList.filter {
                 it.name.contains(query)
             }
-            if (isThere.isEmpty()) {
+            if (isWordThere.isEmpty()) {
                 Log.d(
                     "LandingScreen",
                     "LandingScreen:onQueryChanged -->  create new :$query"
@@ -81,11 +86,6 @@ fun LandingScreen(
                     it.name.contains(query)
                 } as ArrayList<ACText>
             }
-
-            Log.d(
-                "LandingScreen",
-                "LandingScreen:queryList.value -->  ${queryList.value}"
-            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -102,6 +102,7 @@ fun LandingScreen(
                             .fillMaxWidth()
                             .height(50.dp),
                         onClick = {
+                            focusManager.clearFocus()
                             Log.d(
                                 "LandingScreen",
                                 "LandingScreen:TextButton : ${queryList.value[it]}"
